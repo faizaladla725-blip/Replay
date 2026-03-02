@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FOUR48 REPLAY</title>
+    <style>
+        :root { --primary: #e84118; --dark: #1e272e; --bg: #f1f2f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; }
+        
+        /* Landing Page */
+        #landingPage {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; color: white; transition: 0.5s;
+        }
+        .page-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+        header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; }
+        .admin-btn { position: absolute; right: 15px; top: 18px; background: rgba(0,0,0,0.3); border: 1px solid white; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 10px; }
+
+        .container { max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        
+        /* Admin */
+        #adminPanel { display: none; background: white; padding: 20px; border-radius: 10px; border-left: 5px solid var(--primary); margin-bottom: 25px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .form-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        
+        /* Video Card */
+        .video-card { background: white; border-radius: 15px; overflow: hidden; margin-bottom: 30px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .player-area { position: relative; padding-bottom: 56.25%; background: #000; width: 100%; }
+        
+        /* Fitur Full Screen: Iframe diatur agar mendukung penuh */
+        .player-area iframe { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; 
+        }
+
+        /* Lock Screen */
+        .locked-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; padding: 20px; }
+        .btn-unlock { background: var(--primary); color: white; border: none; padding: 12px 30px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 15px; }
+
+        /* Info Text */
+        .info-area { padding: 20px; }
+        .title { font-size: 20px; font-weight: bold; margin: 0 0 5px 0; color: #2f3640; }
+        .date-time { font-size: 13px; color: #718093; margin-bottom: 15px; display: block; }
+        .lineup-box { background: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 3px solid #dcdde1; }
+        .lineup-title { font-size: 11px; font-weight: bold; color: #a4b0be; text-transform: uppercase; margin-bottom: 5px; }
+        .lineup-text { font-size: 14px; color: #2f3640; line-height: 1.6; white-space: pre-line; }
+
+        .btn-del { color: #e84118; background: none; border: none; cursor: pointer; font-size: 12px; padding: 0; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div id="landingPage">
+    <h1 style="letter-spacing: 5px;">FOUR48 MEDIA</h1>
+    <button onclick="enterSite()" style="padding:15px 50px; cursor:pointer; background:var(--primary); color:white; border:none; border-radius:50px; font-weight:bold;">ENTER ARCHIVE</button>
+</div>
+
+<header>
+    <h2 style="margin:0; font-size: 18px;">REPLAY THEATER</h2>
+    <button class="admin-btn" onclick="authAdmin()">ADMIN LOGIN</button>
+</header>
+
+<div class="container">
+    <div id="adminPanel">
+        <h3 style="margin-top:0">🛠 Control Panel</h3>
+        <input type="text" id="inTitle" class="form-input" placeholder="Nama Setlist / Show">
+        <div style="display:flex; gap:10px;">
+            <input type="date" id="inDate" class="form-input">
+            <input type="time" id="inTime" class="form-input">
+        </div>
+        <input type="text" id="inURL" class="form-input" placeholder="Link YouTube/Drive">
+        <textarea id="inLineup" class="form-input" placeholder="Tulis Line-up Member..." rows="4"></textarea>
+        <label style="font-size: 14px;"><input type="checkbox" id="isPremium"> Gunakan Token (Strict 1 HP)</label>
+        <button onclick="saveVideo()" style="width:100%; padding:15px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:10px;">UPLOAD SHOW</button>
+        
+        <div style="margin-top:20px; padding:15px; background:#f1f2f6; border-radius:8px;">
+            <strong>Token Generator (Permanent | 1 HP):</strong><br>
+            <button onclick="generateStrictToken()" style="margin-top:10px;">Buat Token Baru</button>
+            <div id="tokenResult" style="margin-top:10px; font-weight:bold; color:var(--primary);"></div>
+        </div>
+    </div>
+
+    <div id="videoContainer"></div>
+</div>
+
+<script>
+    const ADMIN_PASS = "jkt48oke";
+    let isAdmin = false;
+
+    function getDeviceId() {
+        let id = localStorage.getItem('device_fingerprint');
+        if (!id) {
+            id = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+            localStorage.setItem('device_fingerprint', id);
+        }
+        return id;
+    }
+
+    function enterSite() { document.getElementById('landingPage').classList.add('page-hidden'); loadVideos(); }
+    
+    function authAdmin() {
+        if(prompt("Password Admin:") === ADMIN_PASS) {
+            isAdmin = true;
+            document.getElementById('adminPanel').style.display = 'block';
+            loadVideos();
+        }
+    }
+
+    function generateStrictToken() {
+        let code = "JKT-" + Math.random().toString(36).substr(2, 6).toUpperCase();
+        let tokens = JSON.parse(localStorage.getItem('jktTokens')) || [];
+        tokens.push({ code: code, devices: [] });
+        localStorage.setItem('jktTokens', JSON.stringify(tokens));
+        document.getElementById('tokenResult').innerText = "KODE: " + code;
+    }
+
+    function saveVideo() {
+        let title = document.getElementById('inTitle').value;
+        let date = document.getElementById('inDate').value;
+        let time = document.getElementById('inTime').value;
+        let url = document.getElementById('inURL').value;
+        let lineup = document.getElementById('inLineup').value;
+        let premium = document.getElementById('isPremium').checked;
+
+        if(!title || !url) return alert("Isi Judul & Link!");
+
+        let list = JSON.parse(localStorage.getItem('jktData')) || [];
+        list.push({ id: Date.now(), title, date, time, url, lineup, premium });
+        localStorage.setItem('jktData', JSON.stringify(list));
+        loadVideos();
+    }
+
+    function unlock(vidId) {
+        let code = prompt("Masukkan Token Akses:").toUpperCase();
+        let tokens = JSON.parse(localStorage.getItem('jktTokens')) || [];
+        let tIndex = tokens.findIndex(t => t.code === code);
+        let myId = getDeviceId();
+
+        if(tIndex === -1) return alert("Token Tidak Ditemukan!");
+        let t = tokens[tIndex];
+
+        if(t.devices.length > 0 && !t.devices.includes(myId)) {
+            return alert("Token ini sudah terikat di HP lain.");
+        }
+
+        if(!t.devices.includes(myId)) {
+            t.devices.push(myId);
+            tokens[tIndex] = t;
+            localStorage.setItem('jktTokens', JSON.stringify(tokens));
+        }
+
+        let unlocked = JSON.parse(localStorage.getItem('jktUnlocked')) || [];
+        unlocked.push(vidId);
+        localStorage.setItem('jktUnlocked', JSON.stringify(unlocked));
+        loadVideos();
+    }
+
+    function loadVideos() {
+        let cont = document.getElementById('videoContainer');
+        let list = JSON.parse(localStorage.getItem('jktData')) || [];
+        let unlocked = JSON.parse(localStorage.getItem('jktUnlocked')) || [];
+
+        cont.innerHTML = list.map(v => {
+            let isLocked = v.premium && !unlocked.includes(v.id);
+            // Perbaikan URL Embed YouTube agar mendukung fullscreen
+            let finalUrl = v.url.replace('watch?v=', 'embed/');
+            if(finalUrl.includes('youtube.com/embed/')) {
+                finalUrl += (finalUrl.includes('?') ? '&' : '?') + "rel=0&showinfo=0&autoplay=0";
+            }
+
+            return `
+            <div class="video-card">
+                <div class="player-area">
+                    ${isLocked ? `
+                        <div class="locked-overlay">
+                            <h3>SHOW TERKUNCI</h3>
+                            <button class="btn-unlock" onclick="unlock(${v.id})">MASUKKAN TOKEN</button>
+                        </div>
+                    ` : `
+                        <iframe 
+                            src="${finalUrl}" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                            allowfullscreen>
+                        </iframe>`}
+                </div>
+                <div class="info-area">
+                    <h2 class="title">${v.title}</h2>
+                    <span class="date-time">📅 ${v.date || '--'} | ⏰ ${v.time || '--'} WIB</span>
+                    <div class="lineup-box">
+                        <div class="lineup-title">Line-up Member</div>
+                        <div class="lineup-text">${v.lineup || 'Tidak ada data member.'}</div>
+                    </div>
+                    ${isAdmin ? `<button class="btn-del" onclick="hapus(${v.id})">🗑 Hapus Video</button>` : ''}
+                </div>
+            </div>`;
+        }).reverse().join('');
+    }
+
+    function hapus(id) {
+        if(confirm("Hapus show ini?")) {
+            let list = JSON.parse(localStorage.getItem('jktData')).filter(x => x.id !== id);
+            localStorage.setItem('jktData', JSON.stringify(list));
+            loadVideos();
+        }
+    }
+</script>
+</body>
+</html>
