@@ -3,219 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FOUR48</title>
+    <title>FOUR48 REPLAY</title>
     <style>
-        :root { --primary: #e84118; --dark: #1e272e; --bg: #000; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: white; }
-        
-        /* Landing Page dengan Background */
-        #landingPage {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
-                        url('https://pbs.twimg.com/media/Fj78_80aYAAn_9s?format=jpg&name=large');
-            background-size: cover; background-position: center;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 9999; transition: 0.8s;
-        }
-        .page-hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-
-        header { background: var(--primary); color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
-        .admin-btn { position: absolute; right: 15px; top: 18px; background: rgba(0,0,0,0.3); border: 1px solid white; color: white; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 10px; }
-
-        .container { max-width: 600px; margin: 20px auto; padding: 0 15px; }
+        :root { --primary: #e84118; --bg: #000; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: white; margin: 0; }
+        header { background: var(--primary); padding: 15px; text-align: center; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 500px; margin: auto; padding: 10px; }
         
         /* Admin Panel */
-        #adminPanel { display: none; background: #fff; color: #333; padding: 20px; border-radius: 10px; margin-bottom: 25px; }
-        .form-input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        #adminPanel { background: #fff; color: #000; padding: 15px; border-radius: 12px; margin-bottom: 20px; display: none; box-shadow: 0 10px 30px rgba(232,65,24,0.3); }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
         
         /* Video Card */
-        .video-card { background: #1a1a1a; border-radius: 15px; overflow: hidden; margin-bottom: 30px; border: 1px solid #333; }
-        .player-area { position: relative; padding-bottom: 56.25%; background: #000; width: 100%; overflow: hidden; }
-        
-        /* Video Blur Effect */
-        .video-blur {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            filter: blur(15px) brightness(0.5); transform: scale(1.1); pointer-events: none; border: 0;
-        }
+        .video-card { background: #1a1a1a; border-radius: 15px; overflow: hidden; margin-bottom: 25px; border: 1px solid #333; }
+        .player-area { position: relative; padding-bottom: 56.25%; background: #000; }
         iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-
-        /* Lock Screen Overlay */
-        .locked-overlay { 
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-            z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; 
-            text-align: center; background: rgba(0,0,0,0.2); 
-        }
-        .btn-unlock { 
-            background: var(--primary); color: white; border: none; padding: 12px 25px; 
-            border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(232, 65, 24, 0.5);
-        }
-
-        /* Info Text */
+        
+        /* Effect Preview Blur */
+        .preview-visual { position: absolute; top: 0; left: 0; width: 100%; height: 100%; filter: blur(15px) brightness(0.4); transform: scale(1.1); pointer-events: none; background-size: cover; background-position: center; }
+        
+        .locked-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .btn-unlock { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(232, 65, 24, 0.4); }
+        
         .info-area { padding: 15px; }
-        .title { font-size: 18px; font-weight: bold; margin: 0 0 5px 0; color: #fff; }
-        .lineup-box { background: #252525; padding: 10px; border-radius: 8px; margin-top: 10px; font-size: 13px; color: #ccc; }
+        .title { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+        .lineup { font-size: 12px; color: #aaa; background: #252525; padding: 8px; border-radius: 6px; }
     </style>
 </head>
 <body>
 
-<div id="landingPage">
-    <h1 style="letter-spacing: 5px; text-shadow: 2px 2px 10px #000;">JKT48 HUB</h1>
-    <p style="margin-bottom: 20px; opacity: 0.8;">Replay Theater & Archive</p>
-    <button onclick="enterSite()" style="padding:15px 50px; cursor:pointer; background:var(--primary); color:white; border:none; border-radius:50px; font-weight:bold;">ENTER ARCHIVE</button>
-</div>
-
 <header>
-    <h2 style="margin:0; font-size: 16px;">REPLAY THEATER</h2>
-    <button class="admin-btn" onclick="authAdmin()">ADMIN</button>
+    <div style="width:50px"></div>
+    <h2 style="margin:0; font-size: 16px; letter-spacing: 1px;">FOUR48 REPLAY</h2>
+    <button onclick="loginAdmin()" style="background:none; border:1px solid white; color:white; border-radius:5px; font-size:10px; padding:5px 10px; cursor:pointer;">ADMIN</button>
 </header>
 
 <div class="container">
     <div id="adminPanel">
-        <h3 style="margin-top:0">🛠 Admin Control</h3>
-        <input type="text" id="inTitle" class="form-input" placeholder="Judul Video">
-        <input type="text" id="inURL" class="form-input" placeholder="Link YouTube (Contoh: https://www.youtube.com/watch?v=...)">
-        <textarea id="inLineup" class="form-input" placeholder="Line-up Member..." rows="3"></textarea>
-        <button onclick="saveVideo()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">UPLOAD VIDEO</button>
-        
-        <div style="margin-top:20px; padding:10px; background:#f1f2f6; border-radius:8px; font-size: 12px;">
-            <strong>Token Generator:</strong><br>
-            <button onclick="generateStrictToken()" style="margin-top:5px;">Buat Token</button>
-            <div id="tokenResult" style="color:var(--primary); font-weight:bold; margin:5px 0;"></div>
-            <div id="tokenHistory" style="max-height:100px; overflow-y:auto; background:white; padding:5px; border:1px solid #ccc;"></div>
-        </div>
+        <h3 style="margin-top:0;">Tambah Video Baru</h3>
+        <input type="text" id="title" placeholder="Judul Video">
+        <input type="text" id="url" placeholder="Link YouTube atau Google Drive">
+        <input type="text" id="lineup" placeholder="Lineup Member">
+        <input type="text" id="token" placeholder="Token Akses (Contoh: VIP-ZEE)">
+        <button onclick="sendData()" id="btnSend" style="width:100%; padding:12px; background:green; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold; margin-top:10px;">UPLOAD KE DATABASE</button>
     </div>
 
-    <div id="videoContainer"></div>
+    <div id="videoContainer">
+        <p style="text-align:center; margin-top:50px; opacity:0.5;">Sinkronisasi Database Global...</p>
+    </div>
 </div>
 
 <script>
-    const ADMIN_PASS = "jkt48oke";
-    let isAdmin = false;
-
-    // DATA DEFAULT: Agar web TIDAK PUTIH saat dibuka orang lain
-    const defaultData = [
-        {
-            id: 999,
-            title: "Cara Memakai Kode Akses (Preview)",
-            url: "https://www.youtube.com/watch?v=M6Xv_X9j_E8",
-            lineup: "Contoh: Zee, Freya, Christy, Gracia",
-            premium: true
-        }
-    ];
-
-    function getDeviceId() {
-        let id = localStorage.getItem('device_fingerprint');
-        if (!id) {
-            id = 'HP-' + Math.random().toString(36).substr(2, 5).toUpperCase();
-            localStorage.setItem('device_fingerprint', id);
-        }
-        return id;
-    }
-
-    function enterSite() { 
-        document.getElementById('landingPage').classList.add('page-hidden'); 
-        loadVideos(); 
-    }
+    // API URL MILIK KAMU
+    const API_URL = 'https://sheetdb.io/api/v1/abpnzkw0kucog';
     
-    function authAdmin() {
-        if(prompt("Password Admin:") === ADMIN_PASS) {
-            isAdmin = true;
-            document.getElementById('adminPanel').style.display = 'block';
-            updateTokenHistory();
+    let unlockedList = [];
+    let videoDataGlobal = [];
+
+    // 1. FUNGSI AMBIL DATA DARI EXCEL
+    async function loadData() {
+        try {
+            const response = await fetch(API_URL);
+            videoDataGlobal = await response.json();
+            render(videoDataGlobal);
+        } catch (err) {
+            document.getElementById('videoContainer').innerHTML = "Gagal memuat data. Pastikan API SheetDB aktif.";
         }
     }
 
-    function generateStrictToken() {
-        let code = "JKT-" + Math.random().toString(36).substr(2, 4).toUpperCase();
-        let tokens = JSON.parse(localStorage.getItem('jktTokens')) || [];
-        tokens.push({ code: code, devices: [] });
-        localStorage.setItem('jktTokens', JSON.stringify(tokens));
-        document.getElementById('tokenResult').innerText = "KODE: " + code;
-        updateTokenHistory();
+    // 2. FUNGSI KIRIM DATA DARI WEB KE EXCEL
+    async function sendData() {
+        const btn = document.getElementById('btnSend');
+        const payload = {
+            data: [{
+                id: "ID-" + Date.now(),
+                title: document.getElementById('title').value,
+                url: document.getElementById('url').value,
+                lineup: document.getElementById('lineup').value,
+                token: document.getElementById('token').value.toUpperCase()
+            }]
+        };
+
+        if(!payload.data[0].title || !payload.data[0].url) return alert("Harap isi Judul dan Link!");
+        
+        btn.innerText = "Sedang Mengirim...";
+        btn.disabled = true;
+
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            alert("Berhasil! Video otomatis muncul di HP semua orang.");
+            location.reload();
+        } catch (e) {
+            alert("Gagal mengirim data.");
+            btn.innerText = "UPLOAD KE DATABASE";
+            btn.disabled = false;
+        }
     }
 
-    function updateTokenHistory() {
-        const hist = document.getElementById('tokenHistory');
-        const tokens = JSON.parse(localStorage.getItem('jktTokens')) || [];
-        hist.innerHTML = tokens.map(t => `<div>${t.code}: ${t.devices.length > 0 ? '✅' : '⏳'}</div>`).join('');
-    }
-
-    function saveVideo() {
-        let title = document.getElementById('inTitle').value;
-        let url = document.getElementById('inURL').value;
-        let lineup = document.getElementById('inLineup').value;
-        if(!title || !url) return alert("Isi data!");
-        let list = JSON.parse(localStorage.getItem('jktData')) || [];
-        list.push({ id: Date.now(), title, url, lineup, premium: true });
-        localStorage.setItem('jktData', JSON.stringify(list));
-        alert("Berhasil ditambah!");
-        loadVideos();
-    }
-
-    function unlock(vidId) {
-        let code = prompt("Masukkan Kode Akses:").toUpperCase();
-        let tokens = JSON.parse(localStorage.getItem('jktTokens')) || [];
-        let tIndex = tokens.findIndex(t => t.code === code);
-        let myId = getDeviceId();
-
-        if(tIndex === -1) return alert("Kode Salah!");
-        let t = tokens[tIndex];
-
-        if(t.devices.length > 0 && !t.devices.includes(myId)) return alert("Kode sudah dipakai HP lain!");
-
-        if(!t.devices.includes(myId)) {
-            t.devices.push(myId);
-            localStorage.setItem('jktTokens', JSON.stringify(tokens));
+    // 3. TAMPILKAN VIDEO KE LAYAR
+    function render(videos) {
+        const cont = document.getElementById('videoContainer');
+        if(videos.length === 0) {
+            cont.innerHTML = "<p style='text-align:center; opacity:0.5;'>Belum ada video di database.</p>";
+            return;
         }
 
-        let unlocked = JSON.parse(localStorage.getItem('jktUnlocked')) || [];
-        unlocked.push(vidId);
-        localStorage.setItem('jktUnlocked', JSON.stringify(unlocked));
-        loadVideos();
-    }
-
-    function loadVideos() {
-        let cont = document.getElementById('videoContainer');
-        let storageData = JSON.parse(localStorage.getItem('jktData')) || [];
-        // Gabungkan data default dan data inputan
-        let list = [...storageData, ...defaultData];
-        let unlocked = JSON.parse(localStorage.getItem('jktUnlocked')) || [];
-
-        cont.innerHTML = list.map(v => {
-            let isLocked = !unlocked.includes(v.id);
-            let vidId = v.url.includes('v=') ? v.url.split('v=')[1].split('&')[0] : v.url.split('/').pop();
-            let embedUrl = `https://www.youtube.com/embed/${vidId}`;
+        cont.innerHTML = videos.map(v => {
+            const isLocked = !unlockedList.includes(v.id);
+            const vInfo = processUrl(v.url.trim());
 
             return `
             <div class="video-card">
                 <div class="player-area">
                     ${isLocked ? `
-                        <iframe class="video-blur" src="${embedUrl}?autoplay=1&mute=1&loop=1&playlist=${vidId}&controls=0"></iframe>
+                        ${vInfo.preview}
                         <div class="locked-overlay">
-                            <div style="font-size:30px;">🔒</div>
-                            <button class="btn-unlock" onclick="unlock(${v.id})">INPUT KODE AKSES</button>
+                            <button class="btn-unlock" onclick="inputToken('${v.id}', '${v.token}')">INPUT TOKEN AKSES</button>
                         </div>
                     ` : `
-                        <iframe src="${embedUrl}?autoplay=1" allowfullscreen></iframe>
+                        <iframe src="${vInfo.embed}?autoplay=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
                     `}
                 </div>
                 <div class="info-area">
                     <div class="title">${v.title}</div>
-                    <div class="lineup-box">Member: ${v.lineup}</div>
-                    ${isAdmin ? `<button onclick="hapus(${v.id})" style="color:red; background:none; border:none; margin-top:10px; cursor:pointer;">Hapus</button>` : ''}
+                    <div class="lineup">Member: ${v.lineup}</div>
                 </div>
             </div>`;
-        }).reverse().join('');
+        }).reverse().join(''); // Video terbaru muncul paling atas
     }
 
-    function hapus(id) {
-        let list = JSON.parse(localStorage.getItem('jktData')).filter(x => x.id !== id);
-        localStorage.setItem('jktData', JSON.stringify(list));
-        loadVideos();
+    // 4. DETEKSI LINK YT / DRIVE
+    function processUrl(url) {
+        if (url.includes('youtube') || url.includes('youtu.be')) {
+            const id = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
+            return { 
+                embed: `https://www.youtube.com/embed/${id}`, 
+                preview: `<iframe class="preview-visual" src="https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&controls=0"></iframe>` 
+            };
+        } else {
+            const id = url.split('/d/')[1].split('/')[0];
+            return { 
+                embed: `https://drive.google.com/file/d/${id}/preview`, 
+                preview: `<div class="preview-visual" style="background-image: url('https://pbs.twimg.com/media/Fj78_80aYAAn_9s?format=jpg&name=large');"></div>` 
+            };
+        }
     }
 
-    window.onload = loadVideos;
+    // 5. CEK TOKEN
+    function inputToken(id, correctToken) {
+        const input = prompt("Masukkan Token Khusus Video Ini:").toUpperCase();
+        if(input === correctToken || input === "JKT48-ADMIN") {
+            unlockedList.push(id);
+            render(videoDataGlobal);
+        } else {
+            alert("Token Salah!");
+        }
+    }
+
+    function loginAdmin() {
+        if(prompt("Password Admin:") === "jkt48oke") {
+            document.getElementById('adminPanel').style.display = 'block';
+            window.scrollTo(0,0);
+        }
+    }
+
+    window.onload = loadData;
 </script>
 </body>
 </html>
